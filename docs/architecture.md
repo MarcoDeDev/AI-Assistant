@@ -117,3 +117,25 @@ Alle LLM-Provider liefern ein gemeinsames Domänenmodell (`LLMResponse`) zurück
 - Entkopplung vom OpenAI-SDK
 - Zentrale Erweiterbarkeit
 - Keine externen SDK-Klassen außerhalb der Adapter
+
+## Logging
+
+Die Anwendung verwendet das Python-Logging-Modul.
+
+Die Konfiguration erfolgt zentral in `app/core/logging.py`.
+
+Jede Datei erstellt ihren eigenen Logger über:
+
+```python
+logger = logging.getLogger(__name__)
+
+## Performance-Messung
+
+Die Dauer einer Chat-Anfrage wird im `ChatService` mit `time.perf_counter()` gemessen.
+
+### Gründe
+
+- Monotone Uhr
+- Hohe Präzision
+- Messung der gesamten Business-Operation
+- Grundlage für Monitoring und Performance-Optimierung

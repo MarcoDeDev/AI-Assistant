@@ -139,3 +139,29 @@ Die Dauer einer Chat-Anfrage wird im `ChatService` mit `time.perf_counter()` gem
 - Hohe Präzision
 - Messung der gesamten Business-Operation
 - Grundlage für Monitoring und Performance-Optimierung
+
+## Eigene Exception-Hierarchie
+
+Externe Exceptions werden nicht direkt an die Business-Logik weitergegeben.
+
+Jeder Adapter übersetzt Bibliotheks-spezifische Fehler in projektspezifische Exceptions.
+
+### Gründe
+
+- Entkopplung von Drittanbieter-SDKs
+- Aussagekräftigere Fehler
+- Einheitliche Fehlerbehandlung
+- Einfacher Provider-Wechsel
+
+## Globale Exception Handler
+
+FastAPI-Exception-Handler werden zentral in
+`app/core/exception_handlers.py`
+registriert.
+
+### Gründe
+
+- Einheitliche Fehlerstruktur
+- Keine try/except-Blöcke in Routern
+- Zentrale Wartbarkeit
+- Klare Trennung zwischen Infrastruktur und Business-Logik

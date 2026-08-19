@@ -1,9 +1,20 @@
-from openai import OpenAI
+from openai import (
+    APIConnectionError,
+    AuthenticationError,
+    OpenAI,
+    OpenAIError,
+    RateLimitError,
+)
 
 from app.llm.base import BaseLLM
+from app.llm.exceptions import (
+    LLMAuthenticationError,
+    LLMConnectionError,
+    LLMRateLimitError,
+    LLMUnknownError,
+)
 from app.llm.llm_response import LLMResponse
-from openai import OpenAI
-from openai import OpenAIError
+
 
 class OpenAILLM(BaseLLM):
 
@@ -33,10 +44,17 @@ class OpenAILLM(BaseLLM):
                 ],
             )
 
+        except AuthenticationError as error:
+            raise LLMAuthenticationError() from error
+
+        except RateLimitError as error:
+            raise LLMRateLimitError() from error
+
+        except APIConnectionError as error:
+            raise LLMConnectionError() from error
+
         except OpenAIError as error:
-            raise RuntimeError(
-                "Failed to communicate with OpenAI."
-            ) from error
+            raise LLMUnknownError() from error
 
         return LLMResponse(
             text=response.choices[0].message.content or "",

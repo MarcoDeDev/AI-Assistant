@@ -7,6 +7,7 @@ from app.llm.base import BaseLLM
 from app.llm.openai_llm import OpenAILLM
 from app.services.chat_service import ChatService
 
+
 @lru_cache
 def get_openai_client() -> OpenAI:
 
@@ -23,6 +24,7 @@ def get_llm() -> BaseLLM:
         client=get_openai_client(),
         model=settings.openai_model,
     )
+
 
 def get_chat_service() -> ChatService:
 

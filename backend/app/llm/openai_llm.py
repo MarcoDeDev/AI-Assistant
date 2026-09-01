@@ -1,3 +1,5 @@
+from collections.abc import Sequence
+
 from openai import (
     APIConnectionError,
     AuthenticationError,
@@ -6,6 +8,7 @@ from openai import (
     RateLimitError,
 )
 
+from app.domain.conversation import Message
 from app.llm.base import BaseLLM
 from app.llm.exceptions import (
     LLMAuthenticationError,
@@ -23,24 +26,22 @@ class OpenAILLM(BaseLLM):
         client: OpenAI,
         model: str,
     ) -> None:
-
         self._client = client
         self._model = model
 
     def generate(
-    self,
-    prompt: str,
+        self,
+        messages: Sequence[Message],
     ) -> LLMResponse:
-
         try:
-
             response = self._client.chat.completions.create(
                 model=self._model,
                 messages=[
                     {
-                        "role": "user",
-                        "content": prompt,
+                        "role": message.role.value,
+                        "content": message.content,
                     }
+                    for message in messages
                 ],
             )
 

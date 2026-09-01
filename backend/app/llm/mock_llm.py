@@ -1,13 +1,30 @@
+from collections.abc import Sequence
+
+from app.domain.conversation import Message, MessageRole
 from app.llm.base import BaseLLM
-from app.llm.models import LLMResponse
+from app.llm.llm_response import LLMResponse
 
 
 class MockLLM(BaseLLM):
 
     def generate(
         self,
-        prompt: str,
+        messages: Sequence[Message],
     ) -> LLMResponse:
+        latest_user_message = next(
+            (
+                message
+                for message in reversed(messages)
+                if message.role == MessageRole.USER
+            ),
+            None,
+        )
+
+        prompt = (
+            latest_user_message.content
+            if latest_user_message is not None
+            else ""
+        )
 
         return LLMResponse(
             text=f"Mock response: {prompt}",

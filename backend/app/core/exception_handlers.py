@@ -10,6 +10,9 @@ from app.llm.exceptions import (
     LLMRateLimitError,
     LLMUnknownError,
 )
+
+from app.services.exceptions import ConversationNotFoundError
+
 from app.schemas.error import ErrorResponse
 
 
@@ -38,6 +41,27 @@ def create_error_response(
 def register_exception_handlers(
     app: FastAPI,
 ) -> None:
+
+    @app.exception_handler(
+        ConversationNotFoundError
+    )
+    async def conversation_not_found_handler(
+        request: Request,
+        exc: ConversationNotFoundError,
+    ) -> JSONResponse:
+
+        logger.warning(
+            "Conversation not found on %s %s",
+            request.method,
+            request.url.path,
+        )
+
+        return create_error_response(
+            status_code=404,
+            code="CONVERSATION_NOT_FOUND",
+            message="The requested conversation was not found.",
+        )
+    
 
     @app.exception_handler(
         LLMAuthenticationError

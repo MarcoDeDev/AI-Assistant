@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     openai_model: str
     
     database_url: PostgresDsn
+    test_database_url: PostgresDsn | None = None
 
     model_config = SettingsConfigDict(
         env_file=".env",

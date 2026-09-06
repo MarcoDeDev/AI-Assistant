@@ -3,7 +3,7 @@ from collections.abc import Sequence
 
 from app.domain.conversation import Message
 from app.llm.llm_response import LLMResponse
-
+from app.llm.tool_definition import ToolDefinition
 
 class BaseLLM(ABC):
 
@@ -11,5 +11,7 @@ class BaseLLM(ABC):
     def generate(
         self,
         messages: Sequence[Message],
+        *,
+        tools: Sequence[ToolDefinition] = (),
     ) -> LLMResponse:
         pass

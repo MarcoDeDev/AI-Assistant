@@ -17,13 +17,14 @@ from app.llm.exceptions import (
     LLMRateLimitError,
     LLMUnknownError,
 )
-from app.llm.llm_response import LLMResponse
+from app.llm.llm_response import LLMResponse, TextContent
 from app.main import app
 from app.repositories.conversation_repository import (
     ConversationRepository,
 )
 from app.schemas.chat import ChatRequest
 from app.services.chat_service import ChatService
+from app.llm.tool_definition import ToolDefinition
 
 
 class InMemoryConversationRepository(
@@ -102,6 +103,8 @@ class RateLimitLLM(BaseLLM):
     def generate(
         self,
         messages: Sequence[Message],
+        *,
+        tools: Sequence[ToolDefinition] = (),
     ) -> LLMResponse:
         raise LLMRateLimitError()
 
@@ -111,6 +114,8 @@ class AuthenticationErrorLLM(BaseLLM):
     def generate(
         self,
         messages: Sequence[Message],
+        *,
+        tools: Sequence[ToolDefinition] = (),
     ) -> LLMResponse:
         raise LLMAuthenticationError()
 
@@ -120,6 +125,8 @@ class ConnectionErrorLLM(BaseLLM):
     def generate(
         self,
         messages: Sequence[Message],
+        *,
+        tools: Sequence[ToolDefinition] = (),
     ) -> LLMResponse:
         raise LLMConnectionError()
 
@@ -129,6 +136,8 @@ class UnknownErrorLLM(BaseLLM):
     def generate(
         self,
         messages: Sequence[Message],
+        *,
+        tools: Sequence[ToolDefinition] = (),
     ) -> LLMResponse:
         raise LLMUnknownError()
 
@@ -140,15 +149,21 @@ class RecordingLLM(BaseLLM):
     def generate(
         self,
         messages: Sequence[Message],
+        *,
+        tools: Sequence[ToolDefinition] = (),
     ) -> LLMResponse:
         self.requests.append(
             list(messages),
         )
 
         return LLMResponse(
-            text=(
-                f"Assistant response "
-                f"{len(self.requests)}"
+            content=(
+                TextContent(
+                    text=(
+                        f"Assistant response "
+                        f"{len(self.requests)}"
+                    ),
+                ),
             ),
             model="recording",
             prompt_tokens=0,

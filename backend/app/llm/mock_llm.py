@@ -2,7 +2,8 @@ from collections.abc import Sequence
 
 from app.domain.conversation import Message, MessageRole
 from app.llm.base import BaseLLM
-from app.llm.llm_response import LLMResponse
+from app.llm.llm_response import LLMResponse, TextContent
+from app.llm.tool_definition import ToolDefinition
 
 
 class MockLLM(BaseLLM):
@@ -10,6 +11,8 @@ class MockLLM(BaseLLM):
     def generate(
         self,
         messages: Sequence[Message],
+        *,
+        tools: Sequence[ToolDefinition] = (),
     ) -> LLMResponse:
         latest_user_message = next(
             (
@@ -27,7 +30,11 @@ class MockLLM(BaseLLM):
         )
 
         return LLMResponse(
-            text=f"Mock response: {prompt}",
+            content=(
+                TextContent(
+                    text=f"Mock response: {prompt}",
+                ),
+            ),
             model="mock",
             prompt_tokens=0,
             completion_tokens=0,

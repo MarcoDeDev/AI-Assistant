@@ -3,31 +3,26 @@ requires = ["setuptools>=77.0.3"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "ai-assistant-backend"
+name = "ai-assistant-data-mcp-server"
 version = "0.1.0"
-description = "AI Assistant backend"
+description = "Read-only data and analytics MCP server for AI Assistant"
 requires-python = ">=3.14"
 
 dependencies = [
-    "fastapi==0.139.0",
-    "openai==2.46.0",
+    "mcp==2.2.0",
     "pydantic==2.13.4",
     "pydantic-settings==2.14.2",
-    "uvicorn==0.51.0",
     "sqlalchemy==2.0.52",
     "psycopg[binary]==3.3.4",
-    "alembic==1.19.1",
 ]
 
 [dependency-groups]
 test = [
     "pytest==9.1.1",
-    "httpx==0.28.1",
 ]
 
 [tool.setuptools.packages.find]
-where = ["."]
-include = ["app*"]
+where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

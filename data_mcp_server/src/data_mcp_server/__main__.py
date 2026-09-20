@@ -1,5 +1,5 @@
 from data_mcp_server.config import Settings, load_settings
-from data_mcp_server.server import mcp
+from data_mcp_server.server import create_server
 
 
 def main(
@@ -9,6 +9,10 @@ def main(
         settings
         if settings is not None
         else load_settings()
+    )
+
+    mcp = create_server(
+        runtime_settings,
     )
 
     try:

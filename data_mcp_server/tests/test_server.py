@@ -1,12 +1,13 @@
 import asyncio
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from mcp import Client
 from pydantic import PostgresDsn
 
 from data_mcp_server.__main__ import main
 from data_mcp_server.config import Settings
-from data_mcp_server.server import mcp
+from data_mcp_server.persistence.database import Database
+from data_mcp_server.server import create_server
 
 
 def create_test_settings() -> Settings:
@@ -26,8 +27,12 @@ def create_test_settings() -> Settings:
 
 
 def test_server_starts_without_registered_tools() -> None:
+    server = create_server(
+        create_test_settings(),
+    )
+
     async def list_tool_names() -> list[str]:
-        async with Client(mcp) as client:
+        async with Client(server) as client:
             result = await client.list_tools()
 
             return [
@@ -42,15 +47,45 @@ def test_server_starts_without_registered_tools() -> None:
     assert tool_names == []
 
 
+def test_server_lifespan_disposes_database() -> None:
+    database = Mock(
+        spec=Database,
+    )
+
+    with patch(
+        "data_mcp_server.application.Database",
+        return_value=database,
+    ):
+        server = create_server(
+            create_test_settings(),
+        )
+
+        async def connect() -> None:
+            async with Client(server):
+                pass
+
+        asyncio.run(
+            connect()
+        )
+
+    database.dispose.assert_called_once_with()
+
+
 def test_main_starts_streamable_http() -> None:
     runtime_settings = create_test_settings()
 
     with patch(
-        "data_mcp_server.__main__.mcp.run",
-    ) as run:
+        "data_mcp_server.__main__.create_server",
+    ) as create_server:
+        server = create_server.return_value
+
         main(runtime_settings)
 
-    run.assert_called_once_with(
+    create_server.assert_called_once_with(
+        runtime_settings,
+    )
+
+    server.run.assert_called_once_with(
         transport="streamable-http",
         host="127.0.0.1",
         port=8001,
@@ -61,8 +96,13 @@ def test_main_starts_streamable_http() -> None:
 
 
 def test_main_handles_keyboard_interrupt() -> None:
+    runtime_settings = create_test_settings()
+
     with patch(
-        "data_mcp_server.__main__.mcp.run",
-        side_effect=KeyboardInterrupt,
-    ):
-        main(create_test_settings())
+        "data_mcp_server.__main__.create_server",
+    ) as create_server:
+        create_server.return_value.run.side_effect = (
+            KeyboardInterrupt
+        )
+
+        main(runtime_settings)
